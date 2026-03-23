@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Convivencia Escolar — INTI</title>
+<style>
+:root{
+  --az:#003876;--azl:#1565C0;--azp:#DDEEFF;--azm:#E3F2FD;
+  --ver:#1B5E20;--verp:#E8F5E9;--verl:#388E3C;
+  --roj:#C62828;--rojp:#FFEBEE;
+  --ora:#E65100;--orap:#FFF3E0;
+  --gris:#37474F;--grisp:#ECEFF1;--grism:#CFD8DC;
+  --blanco:#fff;--negro:#000;
+  --sidebar:240px;--header:56px;
+  --shadow:0 2px 8px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:var(--gris);
+     display:flex;flex-direction:column;min-height:100vh;}
+
+/* HEADER */
+.app-header{position:fixed;top:0;left:0;right:0;height:var(--header);
+  background:var(--az);color:#fff;display:flex;align-items:center;
+  padding:0 16px;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;
+  padding:6px;border:none;background:none;}
+.hamburger span{width:22px;height:2px;background:#fff;border-radius:2px;transition:.3s;}
+.app-header h1{font-size:1rem;font-weight:700;flex:1;margin-left:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-badge{display:flex;align-items:center;gap:8px;font-size:.8rem;flex-shrink:0;}
+.user-badge .avatar{width:32px;height:32px;border-radius:50%;background:var(--azl);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.4);color:#fff;
+  border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer;transition:.2s;}
+.logout-btn:hover{background:rgba(255,255,255,.15);}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:var(--header);left:0;width:var(--sidebar);height:calc(100vh - var(--header));
+  background:var(--az);overflow-y:auto;z-index:150;transition:transform .3s;
+  display:flex;flex-direction:column;}
+.sidebar.hidden{transform:translateX(-100%);}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:140;}
+.sidebar-overlay.show{display:block;}
+.nav-section{padding:12px 0;}
+.nav-label{padding:6px 16px;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.45);
+  text-transform:uppercase;letter-spacing:1px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 18px;
+  color:rgba(255,255,255,.8);cursor:pointer;transition:background .15s;
+  border:none;background:none;width:100%;font-size:.88rem;text-align:left;}
+.nav-item:hover{background:rgba(255,255,255,.1);color:#fff;}
+.nav-item.active{background:var(--azl);color:#fff;font-weight:600;}
+.nav-item .ico{font-size:1.1rem;width:20px;text-align:center;flex-shrink:0;}
+.nav-bottom{margin-top:auto;padding:12px;}
+.nav-bottom .nav-item{border-radius:8px;color:rgba(255,255,255,.6);}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);margin-top:var(--header);padding:20px;min-height:calc(100vh - var(--header));transition:margin .3s;}
+.main.full{margin-left:0;}
+
+/* CARDS */
+.page{display:none;animation:fadeIn .25s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page-title{font-size:1.3rem;font-weight:700;color:var(--az);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;}
+.page-title .ico{font-size:1.5rem;}
+
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px;}
+.card-title{font-size:.95rem;font-weight:700;color:var(--az);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:2px solid var(--azp);}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:16px;}
+.stat-card{background:#fff;border-radius:10px;padding:16px;box-shadow:var(--shadow);
+  text-align:center;border-top:4px solid var(--azl);}
+.stat-card.danger{border-top-color:var(--roj);}
+.stat-card.success{border-top-color:var(--verl);}
+.stat-card.warn{border-top-color:var(--ora);}
+.stat-val{font-size:2rem;font-weight:800;color:var(--az);line-height:1;}
+.stat-card.danger .stat-val{color:var(--roj);}
+.stat-card.success .stat-val{color:var(--verl);}
+.stat-card.warn .stat-val{color:var(--ora);}
+.stat-lbl{font-size:.73rem;color:#78909c;margin-top:4px;font-weight:600;}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-group label{font-size:.8rem;font-weight:600;color:var(--gris);}
+.form-group input,.form-group select,.form-group textarea{
+  padding:9px 12px;border:2px solid var(--grism);border-radius:8px;
+  font-size:.9rem;outline:none;transition:border .2s;background:#f9fafb;}
+.form-group input:focus,.form-group select:focus{border-color:var(--azl);background:#fff;}
+.full-width{grid-column:1/-1;}
+
+/* BOTONES */
+.btn{padding:9px 18px;border:none;border-radius:8px;font-size:.85rem;font-weight:700;
+  cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--az);color:#fff;}
+.btn-primary:hover{background:var(--azl);}
+.btn-success{background:var(--verl);color:#fff;}
+.btn-success:hover{background:var(--ver);}
+.btn-danger{background:var(--roj);color:#fff;}
+.btn-danger:hover{background:#b71c1c;}
+.btn-warn{background:var(--ora);color:#fff;}
+.btn-warn:hover{background:#bf360c;}
+.btn-outline{background:transparent;color:var(--az);border:2px solid var(--az);}
+.btn-outline:hover{background:var(--azp);}
+.btn-sm{padding:5px 12px;font-size:.78rem;}
+.btn-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+
+/* TABLA */
+.table-wrap{overflow-x:auto;border-radius:8px;}
+table{width:100%;border-collapse:collapse;font-size:.85rem;}
+th{background:var(--az);color:#fff;padding:10px 12px;text-align:left;font-size:.78rem;white-space:nowrap;}
+td{padding:9px 12px;border-bottom:1px solid var(--grisp);vertical-align:middle;}
+tr:hover td{background:var(--azm);}
+tr:last-child td{border-bottom:none;}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.72rem;font-weight:700;}
+.badge-dem{background:var(--rojp);color:var(--roj);}
+.badge-red{background:var(--verp);color:var(--verl);}
+.badge-rec{background:var(--orap);color:var(--ora);}
+.badge-ok{background:var(--verp);color:var(--verl);}
+.badge-err{background:var(--rojp);color:var(--roj);}
+.badge-warn{background:var(--orap);color:var(--ora);}
+
+/* RADIO GROUPS */
+.radio-group{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.radio-option{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+  border:2px solid var(--grism);border-radius:8px;cursor:pointer;transition:.2s;background:#f9fafb;}
+.radio-option:hover{border-color:var(--azl);background:var(--azm);}
+.radio-option input[type=radio]{margin-top:2px;accent-color:var(--azl);flex-shrink:0;}
+.radio-option .ro-lbl{font-weight:700;font-size:.85rem;color:var(--az);}
+.radio-option .ro-desc{font-size:.78rem;color:var(--gris);margin-top:2px;}
+.radio-option.selected{border-color:var(--azl);background:var(--azm);}
+
+/* ALERT BOXES */
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:12px;font-size:.85rem;display:flex;align-items:flex-start;gap:8px;}
+.alert-danger{background:var(--rojp);border-left:4px solid var(--roj);color:var(--roj);}
+.alert-success{background:var(--verp);border-left:4px solid var(--verl);color:var(--ver);}
+.alert-warn{background:var(--orap);border-left:4px solid var(--ora);color:var(--ora);}
+.alert-info{background:var(--azp);border-left:4px solid var(--azl);color:var(--az);}
+
+/* SEARCH BAR */
+.search-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.search-bar input{flex:1;min-width:180px;padding:9px 14px;border:2px solid var(--grism);
+  border-radius:8px;font-size:.9rem;outline:none;}
+.search-bar input:focus{border-color:var(--azl);}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:500;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:14px;padding:24px;width:100%;max-width:480px;
+  max-height:90vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.3);}
+.modal-title{font-size:1.1rem;font-weight:700;color:var(--az);margin-bottom:16px;}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--grisp);}
+
+/* TARJETA ESTUDIANTE MINI */
+.tarjeta-mini{background:var(--azp);border-radius:10px;padding:12px 14px;}
+.tarjeta-mini h3{font-size:.85rem;font-weight:700;color:var(--az);}
+.tarjeta-mini .tot-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.tot-chip{background:#fff;border-radius:6px;padding:4px 8px;font-size:.78rem;font-weight:700;border:1px solid var(--azl);}
+.tot-chip.dem{border-color:var(--roj);color:var(--roj);}
+.tot-chip.red{border-color:var(--verl);color:var(--verl);}
+.tot-chip.rec{border-color:var(--ora);color:var(--ora);}
+
+/* MONTH SELECTOR */
+.period-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.period-bar label{font-size:.82rem;font-weight:600;color:var(--gris);}
+.period-bar select{padding:6px 10px;border:2px solid var(--grism);border-radius:8px;font-size:.85rem;outline:none;}
+.period-bar select:focus{border-color:var(--azl);}
+
+/* TOAST */
+#toast{position:fixed;bottom:20px;right:20px;background:var(--az);color:#fff;
+  padding:12px 20px;border-radius:10px;font-size:.87rem;z-index:9999;
+  transform:translateY(80px);opacity:0;transition:.3s;max-width:320px;}
+#toast.show{transform:translateY(0);opacity:1;}
+#toast.err{background:var(--roj);}
+#toast.ok{background:var(--verl);}
+
+/* CONSOLIDADO TABLE */
+.con-table th{font-size:.7rem;padding:6px 8px;}
+.con-table td{font-size:.78rem;padding:6px 8px;text-align:center;}
+.con-table .mes-col{text-align:left;font-weight:700;color:var(--az);}
+.con-table tr.total-row td{background:var(--az);color:#fff;font-weight:700;}
+
+/* MOBILE */
+@media(max-width:768px){
+  .hamburger{display:flex;}
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.show{transform:translateX(0);}
+  .main{margin-left:0;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .form-grid{grid-template-columns:1fr;}
+  .user-badge .name{display:none;}
+  .app-header h1{font-size:.85rem;}
+}
+@media(max-width:400px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
+  <h1 style="display:flex;align-items:center;gap:10px">
+    <img src="data:image/jpeg;base64,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" alt="INTI"
+         style="width:36px;height:36px;object-fit:contain;border-radius:50%;flex-shrink:0">
+    Convivencia Escolar — INTI
+  </h1>
+  <div class="user-badge">
+    <div class="avatar" id="avatarLetter">A</div>
+    <span class="name" id="userName">{{ usuario.nombre_completo[:18] }}</span>
+    <a href="/logout"><button class="logout-btn">Salir</button></a>
+  </div>
+</header>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="nav-section">
+    <div class="nav-label">Principal</div>
+    <button class="nav-item" data-page="dashboard" onclick="navTo('dashboard',this)">
+      <span class="ico">🏠</span> Dashboard
+    </button>
+    {% if usuario.rol == 'Administrador' %}
+    <button class="nav-item" data-page="estudiantes" onclick="navTo('estudiantes',this)">
+      <span class="ico">👥</span> Estudiantes
+    </button>
+    {% endif %}
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Registrar</div>
+    <button class="nav-item" data-page="reg-DEMERITO" onclick="navReg('DEMERITO',this)">
+      <span class="ico">⚠️</span> Demérito
+    </button>
+    <button class="nav-item" data-page="reg-REDENCION" onclick="navReg('REDENCION',this)">
+      <span class="ico">✅</span> Redención
+    </button>
+    <button class="nav-item" data-page="reg-RECONOCIMIENTO" onclick="navReg('RECONOCIMIENTO',this)">
+      <span class="ico">🌟</span> Reconocimiento
+    </button>
+  </div>
+  {% if usuario.rol == 'Administrador' %}
+  <div class="nav-section">
+    <div class="nav-label">Administración</div>
+    <button class="nav-item" data-page="consolidado" onclick="navTo('consolidado',this)">
+      <span class="ico">📊</span> Consolidado
+    </button>
+    <button class="nav-item" data-page="usuarios" onclick="navTo('usuarios',this)">
+      <span class="ico">👤</span> Usuarios
+    </button>
+  </div>
+  {% endif %}
+  <div class="nav-bottom">
+    <button class="nav-item" onclick="window.location='/logout'">
+      <span class="ico">🚪</span> Cerrar Sesión
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main" id="main">
+
+<!-- ── DASHBOARD ──────────────────────────────────────────────────────────── -->
+<div class="page" id="page-dashboard">
+  <div class="page-title"><span class="ico">🏠</span> Dashboard</div>
+  <div class="period-bar">
+    <label>Período:</label>
+    <select id="db-mes" onchange="loadDashboard()">
+      {% for n,m in [('1','Enero'),('2','Febrero'),('3','Marzo'),('4','Abril'),('5','Mayo'),('6','Junio'),('7','Julio'),('8','Agosto'),('9','Septiembre'),('10','Octubre'),('11','Noviembre')] %}
+      <option value="{{n}}">{{m}}</option>{% endfor %}
+    </select>
+    <select id="db-anio" onchange="loadDashboard()">
+      <option>2025</option><option selected>2026</option><option>2027</option>
+    </select>
+  </div>
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card"><div class="stat-val" id="st-total">—</div><div class="stat-lbl">Estudiantes</div></div>
+    <div class="stat-card danger"><div class="stat-val" id="st-dem">—</div><div class="stat-lbl">Deméritos</div></div>
+    <div class="stat-card warn"><div class="stat-val" id="st-crit">—</div><div class="stat-lbl">Estado Crítico</div></div>
+    <div class="stat-card success"><div class="stat-val" id="st-red">—</div><div class="stat-lbl">Redenciones</div></div>
+    <div class="stat-card"><div class="stat-val" id="st-rec">—</div><div class="stat-lbl">Reconocimientos</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span>🚨 Estudiantes en Estado Crítico (Art. 5)</span>
+      <span id="alertasContador" style="font-size:.8rem;font-weight:400;color:#e53935"></span>
+    </div>
+    <div class="table-wrap">
+      <table id="alertasTable">
+        <thead>
+          <tr>
+            <th>NIE</th>
+            <th>Nombre completo</th>
+            <th>Grado / Sección</th>
+            <th style="text-align:center">Deméritos</th>
+            <th style="text-align:center">Redenciones</th>
+            <th style="text-align:center">Saldo neto</th>
+            <th>Consecuencia Art. 5</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="alertasBody">
+          <tr><td colspan="8" style="text-align:center;color:#90a4ae;padding:20px">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── ESTUDIANTES ─────────────────────────────────────────────────────────── -->
+<div class="page" id="page-estudiantes">
+  <div class="page-title"><span class="ico">👥</span> Gestión de Estudiantes</div>
+  <div class="btn-bar">
+    <button class="btn btn-primary" onclick="openModalEstudiante()">➕ Nuevo Estudiante</button>
+    {% if usuario.rol == 'Administrador' %}
+    <button class="btn btn-success" onclick="openModal('modalImport')">📥 Importar desde Excel/CSV</button>
+    {% endif %}
+  </div>
+  <!-- Filtro por grado/sección -->
+  <div class="card" style="padding:12px 16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="font-size:.85rem;font-weight:700;color:var(--az)">🎓 Filtrar por Grado/Sección:</span>
+      <select id="filtroGrado" onchange="filtrarEstudiantes()" style="padding:7px 12px;border:2px solid var(--grism);border-radius:8px;font-size:.85rem;outline:none;min-width:180px">
+        <option value="">— Todos los grados —</option>
+      </select>
+      <button class="btn btn-outline btn-sm" onclick="limpiarFiltro()">✕ Limpiar filtro</button>
+      <span id="contadorEst" style="font-size:.8rem;color:#90a4ae;margin-left:auto"></span>
+    </div>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="busqEst" placeholder="Buscar por nombre o NIE..." oninput="buscarEst()">
+    <button class="btn btn-outline" onclick="buscarEst()">🔍 Buscar</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>NIE</th><th>Nombre</th><th>Grado/Sección</th><th>Sexo</th><th>Turno</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody id="estBody"><tr><td colspan="7" style="text-align:center;color:#90a4ae">Cargando...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── REGISTRAR ──────────────────────────────────────────────────────────── -->
+<div class="page" id="page-registrar">
+  <div class="page-title" id="regTitle">⚠️ Registrar Demérito</div>
+
+  <!-- Filtro por sección en registro -->
+  <div class="card" style="padding:14px 16px;margin-bottom:12px;border-left:4px solid var(--az)">
+    <div style="font-size:.78rem;font-weight:700;color:var(--az);margin-bottom:8px">🎓 SELECCIONE LA SECCIÓN</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <select id="regFiltroGrado" onchange="filtrarBusqReg()" style="padding:9px 14px;border:2px solid var(--az);border-radius:8px;font-size:.9rem;min-width:220px;font-weight:600;color:var(--az);outline:none;cursor:pointer;background:#fff">
+        <option value="">— Cargando secciones... —</option>
+      </select>
+      <span id="regSeccionInfo" style="font-size:.78rem;padding:4px 10px;border-radius:12px;background:#eceff1;color:#607d8b"></span>
+    </div>
+    <div id="regSeccionError" style="color:red;font-size:.8rem;margin-top:6px;display:none"></div>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="busqReg" placeholder="Buscar estudiante por nombre o NIE..." oninput="buscarReg()">
+    <button class="btn btn-outline btn-sm" onclick="buscarReg()">🔍</button>
+  </div>
+  <div class="table-wrap" id="regBusqResultados" style="margin-bottom:12px;display:none">
+    <table>
+      <thead><tr><th>NIE</th><th>Nombre completo</th><th>Grado / Sección</th><th>Sexo</th><th>Turno</th><th>Seleccionar</th></tr></thead>
+      <tbody id="regBusqBody"></tbody>
+    </table>
+  </div>
+
+  <div id="regForm" style="display:none">
+    <div class="card">
+      <div class="card-title">📋 Estudiante Seleccionado</div>
+      <div class="tarjeta-mini" id="regEstInfo">—</div>
+    </div>
+    <div class="card">
+      <div class="card-title" id="regCardTitle">Seleccione el tipo de registro</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>11. Fecha</label>
+          <input type="date" id="regFecha">
+        </div>
+        <div class="form-group full-width" id="regOpcionesWrap">
+          <!-- Opciones dinámicas según clase -->
+        </div>
+        <div class="form-group" id="regRespWrap" style="display:none">
+          <label>16. Nombre responsable de cumplimiento</label>
+          <input type="text" id="regResp" placeholder="Nombre completo del responsable">
+        </div>
+        <div class="form-group" id="regDemRefWrap" style="display:none">
+          <label>Demérito a compensar</label>
+          <select id="regDemRef"><option value="">— Seleccione —</option></select>
+        </div>
+        <div class="form-group">
+          <label>17. Firma del estudiante</label>
+          <select id="regFirma"><option value="0">No firmó</option><option value="1">✓ Firmó</option></select>
+        </div>
+      </div>
+      <div class="btn-bar" style="margin-top:12px">
+        <button class="btn btn-primary" onclick="guardarRegistro()">💾 Guardar Registro</button>
+        <button class="btn btn-outline" onclick="cancelarReg()">✕ Cancelar</button>
+        <button class="btn btn-outline" onclick="navTo('dashboard',document.querySelector('[data-page=dashboard]'))" style="background:#e3f2fd;color:#1565c0;border-color:#1565c0">🏠 Regresar al Dashboard</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📄 Tarjeta del Estudiante — Período Actual</div>
+      <div class="table-wrap">
+        <table id="tarjetaTable">
+          <thead><tr><th>Fecha</th><th>D:A</th><th>D:B</th><th>D:C</th><th>D:D</th><th>R:A</th><th>R:B</th><th>R:C</th><th>RC:A</th><th>RC:B</th><th>Docente</th></tr></thead>
+          <tbody id="tarjetaBody"></tbody>
+        </table>
+      </div>
+      <div class="btn-bar" style="margin-top:10px">
+        <button class="btn btn-outline btn-sm" onclick="descargarTarjeta()">📥 Descargar Instrumento 001 (Excel)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONSOLIDADO ────────────────────────────────────────────────────────── -->
+<div class="page" id="page-consolidado">
+  <div class="page-title"><span class="ico">📊</span> Registro Consolidado Mensual — Instrumento No. 002</div>
+  <div class="card" style="padding:14px 16px;margin-bottom:12px">
+    <div style="font-size:.78rem;font-weight:700;color:var(--az);margin-bottom:10px;text-transform:uppercase">🔍 Filtros de Reporte</div>
+    <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+      <div>
+        <label style="font-size:.78rem;color:#607d8b;display:block;margin-bottom:3px">Año</label>
+        <select id="con-anio" style="padding:7px 12px;border:1.5px solid var(--grism);border-radius:8px;font-size:.85rem">
+          <option>2024</option><option>2025</option><option selected>2026</option><option>2027</option><option>2028</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:#607d8b;display:block;margin-bottom:3px">Mes (Excel)</label>
+        <select id="con-mes" style="padding:7px 12px;border:1.5px solid var(--grism);border-radius:8px;font-size:.85rem;min-width:130px">
+          <option value="">— Anual completo —</option>
+          <option value="1">Enero</option><option value="2">Febrero</option>
+          <option value="3">Marzo</option><option value="4">Abril</option>
+          <option value="5">Mayo</option><option value="6">Junio</option>
+          <option value="7">Julio</option><option value="8">Agosto</option>
+          <option value="9">Septiembre</option><option value="10">Octubre</option>
+          <option value="11">Noviembre</option><option value="12">Diciembre</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:#607d8b;display:block;margin-bottom:3px">Sección</label>
+        <select id="con-grado" style="padding:7px 12px;border:1.5px solid var(--grism);border-radius:8px;font-size:.85rem;min-width:180px">
+          <option value="">— Todas las secciones —</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:#607d8b;display:block;margin-bottom:3px">Docente</label>
+        <select id="con-docente" style="padding:7px 12px;border:1.5px solid var(--grism);border-radius:8px;font-size:.85rem;min-width:200px">
+          <option value="">— Todos los docentes —</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="loadConsolidado()">📊 Cargar</button>
+      <button class="btn btn-success btn-sm" onclick="descargarConsolidado()">📥 Excel</button>
+      <button class="btn btn-outline btn-sm" onclick="imprimirConsolidado()" style="border-color:#1565c0;color:#1565c0">🖨️ Imprimir</button>
+    </div>
+    <div id="conFiltroInfo" style="font-size:.75rem;color:#607d8b;margin-top:8px"></div>
+  </div>
+  <div class="card" style="overflow-x:auto">
+    <table class="con-table" id="conTable">
+      <thead>
+        <tr style="background:#003876;color:#fff">
+          <th rowspan="2">11. Mes</th>
+          <th colspan="3">12. Matrícula por Sexo</th>
+          <th colspan="3">13. Deméritos por Sexo</th>
+          <th colspan="5">14. Deméritos por Causales</th>
+          <th colspan="3">15. Redenciones por Sexo</th>
+          <th colspan="4">16. Redenciones por Opción</th>
+          <th colspan="3">17. Reconocimientos por Sexo</th>
+        </tr>
+        <tr style="background:#1565C0;color:#fff">
+          <th>M</th><th>H</th><th>Tot</th>
+          <th>M</th><th>H</th><th>Tot</th>
+          <th>A</th><th>B</th><th>C</th><th>D</th><th>Tot</th>
+          <th>M</th><th>H</th><th>Tot</th>
+          <th>A</th><th>B</th><th>C</th><th>Tot</th>
+          <th>M</th><th>H</th><th>Tot</th>
+        </tr>
+      </thead>
+      <tbody id="conBody"><tr><td colspan="22" style="text-align:center;padding:24px;color:#90a4ae">Presione «Cargar» para ver datos</td></tr></tbody>
+    </table>
+  </div>
+  <div class="card" style="font-size:.78rem;color:var(--gris)">
+    <b>Leyenda — Causales (Art. 3):</b> A=No saludar | B=Omitir «Por favor» | C=Omitir «Gracias» | D=Tono irrespetuoso &nbsp;|&nbsp;
+    <b>Redenciones (Art. 6):</b> A=Semana cortesía | B=Limpieza | C=Campaña valores &nbsp;|&nbsp;
+    <b>Reconocimientos (Art. 7):</b> A=Diploma | B=Mural
+  </div>
+</div>
+
+<!-- ── USUARIOS ────────────────────────────────────────────────────────────── -->
+<div class="page" id="page-usuarios">
+  <div class="page-title"><span class="ico">👤</span> Gestión de Usuarios</div>
+  <div class="btn-bar">
+    <button class="btn btn-primary" onclick="openModalUsuario()">➕ Nuevo Usuario</button>
+    <button class="btn btn-success" onclick="openModal('modalImportUsr')">📥 Importar desde Excel</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody id="usrBody"><tr><td colspan="5" style="text-align:center;color:#90a4ae">Cargando...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+</main><!-- /main -->
+
+<!-- ── MODALES ──────────────────────────────────────────────────────────────── -->
+
+<!-- Modal Importar Estudiantes -->
+<div class="modal-overlay" id="modalImport">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title">📥 Importar Estudiantes desde Excel / CSV</div>
+
+    <div style="background:#e3f2fd;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:.83rem;color:#1565c0">
+      <b>Instrucciones:</b><br>
+      1. Descargue la plantilla Excel con el botón de abajo.<br>
+      2. Complete los datos en la hoja <b>"Estudiantes"</b> (desde la fila 4).<br>
+      3. Guarde el archivo y súbalo aquí.<br>
+      4. También puede subir un <b>archivo CSV</b> con los mismos encabezados.
+    </div>
+
+    <div style="margin-bottom:14px">
+      <a href="/api/plantilla_estudiantes" download="Plantilla_Importacion_Estudiantes.xlsx">
+        <button class="btn btn-outline" type="button">📄 Descargar Plantilla Excel</button>
+      </a>
+    </div>
+
+    <div class="form-group">
+      <label>Seleccionar archivo (.xlsx o .csv)</label>
+      <input type="file" id="archivoImport" accept=".xlsx,.xls,.csv"
+             style="padding:8px;border:2px dashed var(--grism);border-radius:8px;width:100%;font-size:.9rem">
+    </div>
+
+    <div id="importResult" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:.85rem"></div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalImport');limpiarImport()">Cerrar</button>
+      <button class="btn btn-primary" onclick="ejecutarImport()" id="btnImport">📤 Importar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Estudiante -->
+<div class="modal-overlay" id="modalEditEst">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-title">✏️ Editar Estudiante</div>
+    <div class="form-grid">
+      <div class="form-group"><label>NIE</label><input id="eNIE" placeholder="12345678-1"></div>
+      <div class="form-group"><label>Nombre *</label><input id="eNombre"></div>
+      <div class="form-group"><label>Apellido *</label><input id="eApellido"></div>
+      <div class="form-group">
+        <label>Sexo *</label>
+        <select id="eSexo"><option value="M">M — Mujer</option><option value="H">H — Hombre</option></select>
+      </div>
+      <div class="form-group">
+        <label>Grado/Sección *</label>
+        <select id="eGrado"><option value="">Cargando...</option></select>
+      </div>
+      <div class="form-group">
+        <label>Turno *</label>
+        <select id="eTurno">
+          <option value="Matutino">Matutino</option>
+          <option value="Vespertino">Vespertino</option>
+          <option value="Nocturno">Nocturno</option>
+        </select>
+      </div>
+      <div class="form-group full-width"><label>Nombre Responsable</label><input id="eResp"></div>
+      <div class="form-group"><label>Teléfono Responsable</label><input id="eTel" type="tel"></div>
+      <div class="form-group"><label>Correo Responsable</label><input id="eCorreoResp" type="email"></div>
+    </div>
+    <input type="hidden" id="eEstId">
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalEditEst')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionEstudiante()">💾 Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cambiar Contraseña (primer login / voluntario) -->
+<div class="modal-overlay" id="modalCambiarPwd" style="z-index:9999">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title" id="cambiarPwdTitulo">🔐 Personalice su contraseña</div>
+    <p id="cambiarPwdMsg" style="font-size:.85rem;color:#607d8b;margin-bottom:16px">
+      Es su primer acceso al sistema. Por seguridad, establezca una contraseña personal.
+    </p>
+    <div class="form-group">
+      <label>Nueva contraseña *</label>
+      <input type="password" id="nuevaPwd" placeholder="Mínimo 6 caracteres"
+             style="width:100%;padding:10px;border:2px solid var(--grism);border-radius:8px;font-size:.95rem">
+    </div>
+    <div class="form-group" style="margin-top:10px">
+      <label>Confirmar contraseña *</label>
+      <input type="password" id="confirmPwd" placeholder="Repita la contraseña"
+             style="width:100%;padding:10px;border:2px solid var(--grism);border-radius:8px;font-size:.95rem">
+    </div>
+    <div id="cambiarPwdErr" style="color:#c62828;font-size:.82rem;margin-top:6px;display:none"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnCancelarPwd" onclick="closeModal('modalCambiarPwd')" style="display:none">Ahora no</button>
+      <button class="btn btn-primary" onclick="guardarNuevaPwd()">💾 Guardar contraseña</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmación Eliminar -->
+<div class="modal-overlay" id="modalConfirm">
+  <div class="modal" style="max-width:420px;text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:8px" id="confirmIcon">⚠️</div>
+    <div class="modal-title" id="confirmTitle">¿Confirmar eliminación?</div>
+    <p id="confirmMsg" style="color:#607d8b;font-size:.9rem;margin:8px 0 20px"></p>
+    <div class="modal-footer" style="justify-content:center;gap:12px">
+      <button class="btn btn-outline" onclick="closeModal('modalConfirm')">Cancelar</button>
+      <button class="btn btn-danger" id="confirmBtn" onclick="">✓ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nuevo Estudiante -->
+<div class="modal-overlay" id="modalEst">
+  <div class="modal">
+    <div class="modal-title">➕ Nuevo Estudiante</div>
+    <div class="form-grid">
+      <div class="form-group"><label>7. NIE *</label><input id="mNIE" placeholder="12345678-1"></div>
+      <div class="form-group"><label>6. Nombre *</label><input id="mNombre"></div>
+      <div class="form-group"><label>6. Apellido *</label><input id="mApellido"></div>
+      <div class="form-group">
+        <label>8. Sexo *</label>
+        <select id="mSexo"><option value="M">M — Mujer</option><option value="H">H — Hombre</option></select>
+      </div>
+      <div class="form-group">
+        <label>9. Grado/Sección *</label>
+        <select id="mGrado"><option value="">Cargando...</option></select>
+      </div>
+      <div class="form-group">
+        <label>10. Turno *</label>
+        <select id="mTurno">
+          <option value="Matutino">Matutino</option>
+          <option value="Vespertino">Vespertino</option>
+          <option value="Nocturno">Nocturno</option>
+        </select>
+      </div>
+      <div class="form-group full-width"><label>Nombre Responsable</label><input id="mResp"></div>
+      <div class="form-group"><label>Teléfono Responsable</label><input id="mTel" type="tel"></div>
+      <div class="form-group"><label>Correo Responsable</label><input id="mCorreoResp" type="email"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalEst')">Cancelar</button>
+      <button class="btn btn-primary" onclick="crearEstudiante()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Usuario -->
+<div class="modal-overlay" id="modalEditUsr">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">✏️ Editar Usuario</div>
+    <div class="form-grid">
+      <div class="form-group full-width"><label>Nombre completo *</label><input id="euNombre"></div>
+      <div class="form-group full-width"><label>Correo institucional *</label><input id="euCorreo" type="email"></div>
+      <div class="form-group">
+        <label>Rol *</label>
+        <select id="euRol">
+          <option value="2">Docente</option>
+          <option value="1">Administrador</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="euActivo">
+          <option value="1">Activo</option>
+          <option value="0">Inactivo</option>
+        </select>
+      </div>
+    </div>
+    <input type="hidden" id="euId">
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalEditUsr')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionUsuario()">💾 Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Importar Usuarios -->
+<div class="modal-overlay" id="modalImportUsr">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-title">📥 Importar Usuarios desde Excel / CSV</div>
+    <div style="background:#e3f2fd;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:.83rem;color:#1565c0">
+      <b>Instrucciones:</b><br>
+      1. Descargue la plantilla con el botón de abajo.<br>
+      2. Complete los datos desde la fila 4 — <b>no modifique los encabezados</b>.<br>
+      3. El campo <b>contrasena</b> será la contraseña inicial del usuario.<br>
+      4. Deje <b>id_usuario</b> vacío — se asigna automáticamente.<br>
+      5. Suba el archivo completado.
+    </div>
+    <div style="margin-bottom:14px">
+      <a href="/api/plantilla_usuarios" download="Plantilla_Usuarios.xlsx">
+        <button class="btn btn-outline" type="button">📄 Descargar Plantilla Excel</button>
+      </a>
+    </div>
+    <div class="form-group">
+      <label>Seleccionar archivo (.xlsx o .csv)</label>
+      <input type="file" id="archivoImportUsr" accept=".xlsx,.xls,.csv"
+             style="padding:8px;border:2px dashed var(--grism);border-radius:8px;width:100%;font-size:.9rem">
+    </div>
+    <div id="importUsrResult" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:.85rem"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalImportUsr');document.getElementById('archivoImportUsr').value='';document.getElementById('importUsrResult').style.display='none'">Cerrar</button>
+      <button class="btn btn-primary" onclick="ejecutarImportUsuarios()" id="btnImportUsr">📤 Importar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nuevo Usuario -->
+<div class="modal-overlay" id="modalUsr">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title">➕ Nuevo Usuario</div>
+    <div class="form-grid">
+      <div class="form-group full-width"><label>Nombre completo *</label><input id="uNombre"></div>
+      <div class="form-group full-width"><label>Correo institucional *</label><input id="uCorreo" type="email" placeholder="usuario@clases.edu.sv"></div>
+      <div class="form-group"><label>Contraseña inicial *</label><input id="uPass" type="password"></div>
+      <div class="form-group">
+        <label>Rol *</label>
+        <select id="uRol" onchange="toggleSeccionesUsr()">
+          <option value="2">Docente</option>
+          <option value="1">Administrador</option>
+        </select>
+      </div>
+    </div>
+    <!-- Secciones asignadas -->
+    <div id="uSeccionesWrap" style="margin-top:10px">
+      <div style="font-size:.82rem;font-weight:700;color:var(--az);margin-bottom:6px">
+        🎓 Grados/Secciones asignados al docente
+        <span style="font-weight:400;color:#90a4ae"> (si no selecciona ninguno, tendrá acceso a todos)</span>
+      </div>
+      <div id="uGradosGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;max-height:200px;overflow-y:auto;border:2px solid var(--grism);border-radius:8px;padding:10px;background:#fafafa">
+        <div style="color:#90a4ae;font-size:.8rem">Cargando grados...</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalUsr')">Cancelar</button>
+      <button class="btn btn-primary" onclick="crearUsuario()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Secciones de Usuario -->
+<div class="modal-overlay" id="modalGradosUsr">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title">🎓 Grados/Secciones asignados</div>
+    <div style="font-size:.82rem;color:#90a4ae;margin-bottom:10px">
+      Seleccione los grados a los que tendrá acceso este docente. Sin selección = acceso a todos.
+    </div>
+    <div id="editGradosGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;max-height:260px;overflow-y:auto;border:2px solid var(--grism);border-radius:8px;padding:10px;background:#fafafa">
+      <div style="color:#90a4ae;font-size:.8rem">Cargando...</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalGradosUsr')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarGradosUsr()">💾 Guardar asignación</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Reset Contraseña -->
+<div class="modal-overlay" id="modalReset">
+  <div class="modal">
+    <div class="modal-title">🔑 Resetear Contraseña</div>
+    <input type="hidden" id="resetUid">
+    <div class="form-group"><label>Nueva contraseña</label><input id="resetPass" type="password"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalReset')">Cancelar</button>
+      <button class="btn btn-warn" onclick="doReset()">🔑 Resetear</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle Estudiante -->
+<div class="modal-overlay" id="modalDetalle">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-title" id="detalleTitle">Tarjeta del Estudiante</div>
+    <div id="detalleContent"></div>
+    <div class="modal-footer">
+      <button class="btn btn-success btn-sm" id="detalleXlsBtn" onclick="descargarTarjetaModal()">📥 Descargar Excel (Inst. 001)</button>
+      <button class="btn btn-outline" onclick="closeModal('modalDetalle')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ── Estado global ────────────────────────────────────────────────────────────
+const USR = {{ usuario | tojson }};
+let currentPage = '';
+let regClase = '';
+let regEstId = null;
+let detalleEstId = null;
+
+// ── Utilidades ───────────────────────────────────────────────────────────────
+function toast(msg, type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show '+(type||'');
+  setTimeout(()=>t.className='',3200);
+}
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function $(id){return document.getElementById(id);}
+function fmtDate(s){
+  if(!s) return '';
+  // Handle full datetime like "Fri, 06 Mar 2026 00:00:00 GMT"
+  if(s.includes(',') || s.includes('GMT')) {
+    const d = new Date(s);
+    if(!isNaN(d)) {
+      const dd=String(d.getUTCDate()).padStart(2,'0');
+      const mm=String(d.getUTCMonth()+1).padStart(2,'0');
+      const yy=d.getUTCFullYear();
+      return dd+'/'+mm+'/'+yy;
+    }
+  }
+  // Handle YYYY-MM-DD
+  const p = s.split('T')[0].split('-');
+  if(p.length===3) return p[2]+'/'+p[1]+'/'+p[0];
+  return s;
+}
+function checkmark(v){return v?'✓':'';}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+function toggleSidebar(){
+  const s=$('sidebar'), o=$('sidebarOverlay');
+  s.classList.toggle('show'); o.classList.toggle('show');
+}
+function closeSidebar(){$('sidebar').classList.remove('show');$('sidebarOverlay').classList.remove('show');}
+
+// ── Navegación ───────────────────────────────────────────────────────────────
+function navTo(page, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  $('page-'+page).classList.add('active');
+  if(btn) btn.classList.add('active');
+  currentPage = page;
+  closeSidebar();
+  if(page==='dashboard') loadDashboard();
+  if(page==='estudiantes') loadEstudiantes();
+  if(page==='consolidado') {
+    $('con-anio').value=new Date().getFullYear();
+    cargarFiltrosConsolidado();
+    loadConsolidado();
+  }
+  if(page==='usuarios') loadUsuarios();
+  history.pushState({page},'','/'+page);
+}
+
+function navReg(clase, btn){
+  regClase = clase;
+  regEstId = null;
+
+  // Limpiar formulario
+  document.getElementById('regBusqResultados').style.display='none';
+  document.getElementById('regForm').style.display='none';
+  document.getElementById('busqReg').value='';
+
+  // Títulos
+  const titles={DEMERITO:'⚠️ Registrar Demérito — Campo 12. D',
+                REDENCION:'✅ Registrar Redención — Campo 13. R',
+                RECONOCIMIENTO:'🌟 Registrar Reconocimiento — Campo 14. RC'};
+  document.getElementById('regTitle').textContent = titles[clase];
+  document.getElementById('regCardTitle').textContent = 'Seleccione opción de '+clase.toLowerCase();
+  renderRegOpciones(clase);
+
+  // Activar página
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('page-registrar').classList.add('active');
+  if(btn) btn.classList.add('active');
+  currentPage = 'registrar';
+  closeSidebar();
+
+  // ── Cargar secciones DIRECTAMENTE aquí ──
+  var selSec = document.getElementById('regFiltroGrado');
+  var infoSec = document.getElementById('regSeccionInfo');
+  var errSec = document.getElementById('regSeccionError');
+
+  if(selSec){
+    selSec.innerHTML = '<option value="">— Cargando secciones... —</option>';
+    if(errSec) errSec.style.display = 'none';
+
+    fetch('/api/mis_grados')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(!Array.isArray(data)){
+          throw new Error((data && data.error) ? data.error : 'Error del servidor');
+        }
+        _misGradosReg = data;
+
+        var esAdmin = (USR.rol === 'Administrador');
+        var asignadas = data.filter(function(g){ return g.asignado == 1; });
+        var opciones = esAdmin ? data : (asignadas.length > 0 ? asignadas : data);
+        var label = esAdmin
+          ? '— Todas las secciones ('+data.length+') —'
+          : (asignadas.length > 0
+              ? '— Mis secciones ('+asignadas.length+') —'
+              : '— Todas las secciones ('+data.length+') —');
+
+        var html = '<option value="">'+label+'</option>';
+        for(var i=0; i<opciones.length; i++){
+          var g = opciones[i];
+          html += '<option value="'+g.id_grado+'">'+g.nombre+' "'+g.seccion+'"</option>';
+        }
+        selSec.innerHTML = html;
+
+        if(infoSec){
+          if(esAdmin){
+            infoSec.textContent = data.length+' secciones (Admin)';
+            infoSec.style.background='#e3f2fd'; infoSec.style.color='#1565c0';
+          } else if(asignadas.length > 0){
+            infoSec.textContent = '✓ '+asignadas.length+' sección(es) asignada(s)';
+            infoSec.style.background='#e8f5e9'; infoSec.style.color='#2e7d32';
+          } else {
+            infoSec.textContent = 'Sin asignación — mostrando todas';
+            infoSec.style.background='#fff3e0'; infoSec.style.color='#e65100';
+          }
+        }
+
+        if(opciones.length === 1){
+          selSec.value = String(opciones[0].id_grado);
+        }
+
+        mostrarEstudiantesReg('');
+      })
+      .catch(function(err){
+        if(errSec){ errSec.textContent='Error: '+err.message; errSec.style.display='block'; }
+        selSec.innerHTML = '<option value="">— Error al cargar —</option>';
+        mostrarEstudiantesReg('');
+      });
+  }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function loadDashboard(){
+  const mes=$('db-mes').value, anio=$('db-anio').value;
+  fetch(`/api/dashboard?mes=${mes}&anio=${anio}`).then(r=>r.json()).then(d=>{
+    if(d.error){toast(d.error,'err');return;}
+    $('st-total').textContent = d.stats.total_estudiantes||0;
+    $('st-dem').textContent   = d.stats.total_demeritos||0;
+    $('st-crit').textContent  = d.stats.criticos||0;
+    $('st-red').textContent   = d.stats.total_redenciones||0;
+    $('st-rec').textContent   = d.stats.total_reconocimientos||0;
+    const body=$('alertasBody');
+    if(!d.alertas||!d.alertas.length){
+      body.innerHTML='<tr><td colspan="5" style="text-align:center;color:#388E3C;padding:16px">✅ Ningún estudiante en estado crítico este período</td></tr>';return;
+    }
+    const contador = $('alertasContador');
+    if(contador) contador.textContent = `${d.alertas.length} estudiante(s) en estado crítico`;
+    body.innerHTML=d.alertas.map(a=>{
+      const saldo = parseInt(a.saldo_neto||0);
+      const color = saldo>=15?'#b71c1c':saldo>=10?'#c62828':saldo>=6?'#e53935':'#ef9a9a';
+      return `<tr style="background:${saldo>=10?'#fff8f8':''}">
+        <td><b>${a.nie||'—'}</b></td>
+        <td><span style="font-weight:700">${a.nombre||''} ${a.apellido||''}</span>
+            ${a.nombre_responsable?`<br><span style="font-size:.74rem;color:#90a4ae">👤 ${a.nombre_responsable}</span>`:''}
+        </td>
+        <td>${a.grado_nombre||''} &quot;${a.seccion||''}&quot;</td>
+        <td style="text-align:center;font-weight:700;color:#c62828">${a.total_demeritos||0}</td>
+        <td style="text-align:center;font-weight:700;color:#2e7d32">${a.total_redenciones||0}</td>
+        <td style="text-align:center"><span style="background:${color};color:#fff;padding:3px 10px;border-radius:20px;font-weight:700;font-size:.95rem">${saldo}</span></td>
+        <td style="font-size:.78rem;color:${saldo>=10?'#b71c1c':'#e65100'}">${a.consecuencia||''}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="verDetalle(${a.id_estudiante})">📋 Ver</button></td>
+      </tr>`;
+    }).join('');
+  });
+}
+
+// Set current month
+(function(){
+  const now=new Date();
+  $('db-mes').value=now.getMonth()+1;
+  $('db-anio').value=now.getFullYear();
+})();
+
+// Primer login: mostrar modal cambio de contraseña
+(function(){
+  if(USR.primer_login && parseInt(USR.primer_login) === 1){
+    document.getElementById('btnCancelarPwd').style.display='none';
+    openModal('modalCambiarPwd');
+  }
+})();
+
+// ── ESTUDIANTES ───────────────────────────────────────────────────────────────
+// Cache todos los estudiantes para filtrado local
+let _todosEstudiantes = [];
+
+function loadEstudiantes(){
+  var sel = $('filtroGrado');
+  var body = $('estBody');
+  if(body) body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:16px;color:#90a4ae">Cargando...</td></tr>';
+  fetch('/api/estudiantes').then(r=>r.json()).then(function(data){
+    _todosEstudiantes = data;
+    // Poblar filtro de grado si está vacío
+    if(sel && sel.options.length <= 1){
+      var gradosVistos = {};
+      data.forEach(function(e){
+        var key = (e.grado_nombre||'') + ' "' + (e.seccion||'') + '"';
+        if(!gradosVistos[key]){
+          gradosVistos[key] = true;
+          var op = document.createElement('option');
+          op.value = key; op.textContent = key;
+          sel.appendChild(op);
+        }
+      });
+    }
+    renderEstudiantes(data);
+  }).catch(function(err){
+    if(body) body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:red">Error: '+err.message+'</td></tr>';
+  });
+}
+
+function renderEstudiantes(data){
+  const body=$('estBody');
+  const contador=$('contadorEst');
+  if(contador) contador.textContent=`${data.length} estudiante(s)`;
+  if(!data.length){
+    body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:#90a4ae">Sin estudiantes encontrados</td></tr>';
+    return;
+  }
+  body.innerHTML=data.map(e=>`<tr>
+    <td><b>${e.nie||'—'}</b></td>
+    <td>${e.nombre||''} ${e.apellido||''}</td>
+    <td><span class="badge badge-ok" style="background:var(--azp);color:var(--az)">${e.grado_nombre||''} "${e.seccion||''}"</span></td>
+    <td>${e.sexo==='M'?'♀ Mujer':'♂ Hombre'}</td>
+    <td>${e.turno||'—'}</td>
+    <td><span class="badge ${e.activo?'badge-ok':'badge-err'}">${e.activo?'Activo':'Inactivo'}</span></td>
+    <td style="display:flex;gap:4px;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="verDetalle(${e.id_estudiante})">📋 Ver</button>
+      ${USR.rol==='Administrador' ? `
+        <button class="btn btn-outline btn-sm" onclick="abrirEditarEstudiante(${e.id_estudiante})" title="Editar">✏️ Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmarEliminarEstudiante(${e.id_estudiante},'${(e.nombre+' '+e.apellido).replace(/'/g,"\\'")}')">🗑️ Eliminar</button>
+      ` : ''}
+    </td>
+  </tr>`).join('');
+}
+
+function filtrarEstudiantes(){
+  var grado = $('filtroGrado').value;
+  var q     = ($('busqEst').value||'').trim();
+
+  // Siempre buscar en API para garantizar resultados correctos
+  var url = '/api/estudiantes';
+  var params = [];
+  if(q)     params.push('q='+encodeURIComponent(q));
+  // No podemos filtrar por nombre de grado directamente, filtramos localmente por grado
+  if(params.length) url += '?' + params.join('&');
+
+  var body = $('estBody');
+  body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:12px;color:#90a4ae">Buscando...</td></tr>';
+
+  fetch(url).then(r=>r.json()).then(function(data){
+    _todosEstudiantes = data;
+    // Aplicar filtro de grado localmente
+    if(grado){
+      data = data.filter(function(e){
+        return ((e.grado_nombre||'') + ' "' + (e.seccion||'') + '"') === grado;
+      });
+    }
+    renderEstudiantes(data);
+  }).catch(function(err){
+    body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:red">Error: '+err.message+'</td></tr>';
+  });
+}
+
+function limpiarFiltro(){
+  $('filtroGrado').value='';
+  $('busqEst').value='';
+  loadEstudiantes();
+}
+
+let busqTimeout;
+function buscarEst(){clearTimeout(busqTimeout);busqTimeout=setTimeout(()=>filtrarEstudiantes(),400);}
+
+function openModalEstudiante(){
+  $('mNIE').value='';$('mNombre').value='';$('mApellido').value='';
+  $('mResp').value='';$('mTel').value='';$('mCorreoResp').value='';
+  fetch('/api/grados').then(r=>r.json()).then(gs=>{
+    $('mGrado').innerHTML=gs.map(g=>`<option value="${g.id_grado}">${g.nombre} "${g.seccion}"</option>`).join('');
+  });
+  openModal('modalEst');
+}
+
+function crearEstudiante(){
+  const datos={nie:$('mNIE').value.trim(),nombre:$('mNombre').value.trim(),
+    apellido:$('mApellido').value.trim(),sexo:$('mSexo').value,
+    id_grado:parseInt($('mGrado').value),turno:$('mTurno').value,
+    nombre_responsable:$('mResp').value.trim(),
+    telefono_responsable:$('mTel').value.trim(),
+    correo_responsable:$('mCorreoResp').value.trim()};
+  if(!datos.nie||!datos.nombre||!datos.apellido){toast('NIE, nombre y apellido son obligatorios.','err');return;}
+  fetch('/api/estudiantes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)})
+  .then(r=>r.json()).then(d=>{
+    if(d.ok){closeModal('modalEst');loadEstudiantes();toast('✅ Estudiante registrado correctamente.','ok');}
+    else toast(d.error||'Error al guardar.','err');
+  });
+}
+
+function verDetalle(id){
+  detalleEstId = id;
+  const now=new Date(), mes=now.getMonth()+1, anio=now.getFullYear();
+  fetch(`/api/estudiantes/${id}?mes=${mes}&anio=${anio}`).then(r=>r.json()).then(d=>{
+    const e=d.estudiante, t=d.totales||{}, regs=d.tarjeta||[];
+    $('detalleTitle').textContent=`📋 ${e.nombre} ${e.apellido} — NIE: ${e.nie}`;
+    let html=`<div class="tarjeta-mini" style="margin-bottom:12px">
+      <h3>Período: ${now.toLocaleString('es',{month:'long'})} ${anio}</h3>
+      <div class="tot-row">
+        <span class="tot-chip dem">Deméritos: ${t.total_demeritos||0}</span>
+        <span class="tot-chip red">Redenciones: ${t.total_redenciones||0}</span>
+        <span class="tot-chip rec">Reconocimientos: ${t.total_reconocimientos||0}</span>
+        <span class="tot-chip ${(t.saldo_neto||0)>=3?'dem':'red'}">Saldo: ${t.saldo_neto||0}</span>
+      </div></div>`;
+    if(regs.length){
+      html+=`<div class="table-wrap"><table style="font-size:.78rem">
+        <thead><tr><th>Fecha</th><th>D:A</th><th>D:B</th><th>D:C</th><th>D:D</th><th>R:A</th><th>R:B</th><th>R:C</th><th>RC:A</th><th>RC:B</th></tr></thead>
+        <tbody>${regs.map(r=>`<tr>
+          <td>${fmtDate(r.fecha)}</td>
+          <td>${r.causal_demerito==='A'?'✓':''}</td><td>${r.causal_demerito==='B'?'✓':''}</td>
+          <td>${r.causal_demerito==='C'?'✓':''}</td><td>${r.causal_demerito==='D'?'✓':''}</td>
+          <td>${r.opcion_redencion==='A'?'✓':''}</td><td>${r.opcion_redencion==='B'?'✓':''}</td>
+          <td>${r.opcion_redencion==='C'?'✓':''}</td>
+          <td>${r.tipo_reconocimiento==='A'?'✓':''}</td><td>${r.tipo_reconocimiento==='B'?'✓':''}</td>
+        </tr>`).join('')}</tbody></table></div>`;
+    } else {
+      html+='<p style="color:#90a4ae;text-align:center;padding:12px">Sin registros en el período actual.</p>';
+    }
+    $('detalleContent').innerHTML=html;
+    openModal('modalDetalle');
+  });
+}
+
+function descargarTarjetaModal(){
+  const now=new Date();
+  window.location=`/api/excel/tarjeta/${detalleEstId}?mes=${now.getMonth()+1}&anio=${now.getFullYear()}`;
+}
+
+// ── REGISTRAR ─────────────────────────────────────────────────────────────────
+const CAUSALES={
+  A:'A) No saludar al entrar o al salir del aula.',
+  B:'B) Omitir «Por favor» al hacer una petición.',
+  C:'C) Omitir «Gracias» al recibir un favor, material o atención.',
+  D:'D) Usar un tono grosero o irrespetuoso hacia compañeros, docentes o personal.'
+};
+const OPCIONES_RED={
+  A:'A) Cumplir una semana completa con saludos y expresiones de cortesía ejemplares.',
+  B:'B) Apoyar voluntariamente en actividades de orden y limpieza escolar.',
+  C:'C) Participar en campañas de valores organizadas por el centro educativo.'
+};
+const TIPOS_REC={
+  A:'A) Diploma de Mención Honorífica de Cortesía Escolar.',
+  B:'B) Mención en Mural Escolar.'
+};
+
+function renderRegOpciones(clase){
+  let opciones={};
+  let colClass='';
+  if(clase==='DEMERITO'){opciones=CAUSALES;colClass='dem';}
+  else if(clase==='REDENCION'){opciones=OPCIONES_RED;colClass='red';}
+  else{opciones=TIPOS_REC;colClass='rec';}
+  const labels={DEMERITO:'Causal del Demérito (Art. 3)',REDENCION:'Opción de Redención (Art. 6)',RECONOCIMIENTO:'Tipo de Reconocimiento (Art. 7)'};
+  const wrap=$('regOpcionesWrap');
+  wrap.innerHTML=`<label>${labels[clase]}</label><div class="radio-group" id="radiosGrp">
+    ${Object.entries(opciones).map(([k,v])=>`
+    <label class="radio-option" id="ro-${k}">
+      <input type="radio" name="regOpcion" value="${k}" onchange="selOpc('${k}')">
+      <div><div class="ro-lbl">${k}</div><div class="ro-desc">${v}</div></div>
+    </label>`).join('')}
+  </div>`;
+  $('regRespWrap').style.display = clase==='REDENCION'?'flex':'none';
+  $('regDemRefWrap').style.display = clase==='REDENCION'?'flex':'none';
+}
+
+function selOpc(k){
+  document.querySelectorAll('.radio-option').forEach(el=>el.classList.remove('selected'));
+  const ro=document.getElementById('ro-'+k);
+  if(ro) ro.classList.add('selected');
+}
+
+let busqRegTimeout;
+function buscarReg(){
+  clearTimeout(busqRegTimeout);
+  const q=$('busqReg').value.trim();
+  if(q.length<2) return;
+  busqRegTimeout=setTimeout(()=>{
+    fetch(`/api/estudiantes?q=${encodeURIComponent(q)}`).then(r=>r.json()).then(data=>{
+      const res=$('regBusqResultados'), body=$('regBusqBody');
+      if(!data.length){body.innerHTML='<tr><td colspan="5" style="color:#90a4ae">Sin resultados</td></tr>';res.style.display='block';return;}
+      body.innerHTML=data.map(e=>`<tr>
+        <td>${e.nie||'—'}</td><td>${e.nombre} ${e.apellido}</td>
+        <td>${e.grado_nombre||''} ${e.seccion||''}</td><td>${e.turno||''}</td>
+        <td><button class="btn btn-primary btn-sm" onclick="selEstReg(${e.id_estudiante},'${(e.nombre+' '+e.apellido).replace(/'/g,"\\'")}','${e.nie||''}')">Seleccionar</button></td>
+      </tr>`).join('');
+      res.style.display='block';
+    });
+  },300);
+}
+
+function selEstReg(id, nombre, nie){
+  regEstId = id;
+  $('regBusqResultados').style.display='none';
+  $('regEstInfo').innerHTML=`<h3>${nombre} — NIE: ${nie}</h3>`;
+  $('regForm').style.display='block';
+  $('regFecha').value=new Date().toISOString().split('T')[0];
+  cargarTarjeta(id);
+  if(regClase==='REDENCION') cargarDemeritosActivos(id);
+}
+
+function cargarTarjeta(id){
+  const now=new Date(), mes=now.getMonth()+1, anio=now.getFullYear();
+  fetch(`/api/estudiantes/${id}?mes=${mes}&anio=${anio}`).then(r=>r.json()).then(d=>{
+    const regs=d.tarjeta||[], t=d.totales||{};
+    const body=$('tarjetaBody');
+    if(!regs.length){body.innerHTML='<tr><td colspan="11" style="color:#90a4ae;text-align:center">Sin registros en el período</td></tr>';return;}
+    body.innerHTML=regs.map(r=>`<tr>
+      <td>${fmtDate(r.fecha)}</td>
+      <td>${r.causal_demerito==='A'?'✓':''}</td><td>${r.causal_demerito==='B'?'✓':''}</td>
+      <td>${r.causal_demerito==='C'?'✓':''}</td><td>${r.causal_demerito==='D'?'✓':''}</td>
+      <td>${r.opcion_redencion==='A'?'✓':''}</td><td>${r.opcion_redencion==='B'?'✓':''}</td>
+      <td>${r.opcion_redencion==='C'?'✓':''}</td>
+      <td>${r.tipo_reconocimiento==='A'?'✓':''}</td><td>${r.tipo_reconocimiento==='B'?'✓':''}</td>
+      <td style="font-size:.75rem">${r.docente_nombre||'—'}</td>
+    </tr>`).join('');
+    // Mostrar totales
+    const estInfo=$('regEstInfo');
+    estInfo.innerHTML=estInfo.innerHTML+`<div class="tot-row" style="margin-top:8px">
+      <span class="tot-chip dem">D:${t.total_demeritos||0}</span>
+      <span class="tot-chip red">R:${t.total_redenciones||0}</span>
+      <span class="tot-chip rec">RC:${t.total_reconocimientos||0}</span>
+      <span class="tot-chip ${(t.saldo_neto||0)>=3?'dem':'red'}">Saldo:${t.saldo_neto||0}</span>
+    </div>`;
+  });
+}
+
+function cargarDemeritosActivos(id){
+  const now=new Date(), mes=now.getMonth()+1, anio=now.getFullYear();
+  fetch(`/api/demeritos_activos/${id}?mes=${mes}&anio=${anio}`).then(r=>r.json()).then(data=>{
+    const sel=$('regDemRef');
+    sel.innerHTML='<option value="">— Seleccione demérito a compensar —</option>';
+    data.forEach(d=>{
+      sel.innerHTML+=`<option value="${d.id_tarjeta}">${fmtDate(d.fecha)} — Causal ${d.causal_demerito}</option>`;
+    });
+  });
+}
+
+function guardarRegistro(){
+  if(!regEstId){toast('Seleccione un estudiante primero.','err');return;}
+  const opcionSel=document.querySelector('input[name="regOpcion"]:checked');
+  if(!opcionSel){toast('Seleccione una opción.','err');return;}
+  const fecha=$('regFecha').value;
+  if(!fecha){toast('Ingrese la fecha del registro.','err');return;}
+  const p=fecha.split('-');
+  const datos={
+    id_estudiante:regEstId,
+    clase:regClase,
+    fecha:`${p[2]}/${p[1]}/${p[0]}`,
+    firma_estudiante:parseInt($('regFirma').value),
+  };
+  if(regClase==='DEMERITO')       datos.causal_demerito=opcionSel.value;
+  if(regClase==='REDENCION'){     datos.opcion_redencion=opcionSel.value;
+    datos.nombre_resp_redencion=$('regResp').value.trim();
+    const dr=$('regDemRef').value; if(dr) datos.id_demerito_ref=parseInt(dr);}
+  if(regClase==='RECONOCIMIENTO') datos.tipo_reconocimiento=opcionSel.value;
+
+  fetch('/api/registrar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)})
+  .then(r=>r.json()).then(d=>{
+    if(!d.ok){toast(d.error||'Error al guardar.','err');return;}
+    toast('✅ Registro guardado correctamente.','ok');
+    cargarTarjeta(regEstId);
+    if(regClase==='REDENCION') cargarDemeritosActivos(regEstId);
+    document.querySelectorAll('input[name="regOpcion"]').forEach(r=>r.checked=false);
+    document.querySelectorAll('.radio-option').forEach(el=>el.classList.remove('selected'));
+    $('regFecha').value=new Date().toISOString().split('T')[0];
+    if(d.alerta_umbral){
+      const saldo=d.totales.saldo_neto||0;
+      if(confirm(`⚠️ El estudiante ha alcanzado ${saldo} deméritos netos.\nArt. 5 aplicable.\n\n¿Descargar Instrumento No. 001 ahora?`)){
+        const now=new Date();
+        window.location=`/api/excel/tarjeta/${regEstId}?mes=${now.getMonth()+1}&anio=${now.getFullYear()}`;
+      }
+    }
+  });
+}
+
+function cancelarReg(){regEstId=null;$('regForm').style.display='none';$('busqReg').value='';$('regBusqResultados').style.display='none';}
+
+// ── Grados/Secciones ─────────────────────────────────────────────────────────
+let _todosGrados = [];
+let _editGradosUid = null;
+
+function renderGradosCheckboxes(containerId, grados, asignados=null){
+  const grid = $(containerId);
+  if(!grid) return;
+  grid.innerHTML = grados.map(g=>{
+    const checked = asignados ? asignados.includes(g.id_grado) : !!g.asignado;
+    const label = `${g.nombre} "${g.seccion}"`;
+    return `<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer;padding:4px 8px;border-radius:6px;background:${checked?'var(--azp)':'#f5f5f5'};border:1.5px solid ${checked?'var(--az)':'#ddd'}" onclick="toggleGradoCheck(this)">
+      <input type="checkbox" data-id="${g.id_grado}" ${checked?'checked':''} style="accent-color:var(--az)">
+      ${label}
+    </label>`;
+  }).join('');
+}
+
+function toggleGradoCheck(lbl){
+  const chk = lbl.querySelector('input');
+  // checkbox toggles automatically, just update style
+  setTimeout(()=>{
+    lbl.style.background = chk.checked ? 'var(--azp)' : '#f5f5f5';
+    lbl.style.border = `1.5px solid ${chk.checked ? 'var(--az)' : '#ddd'}`;
+  },0);
+}
+
+function getCheckedGrados(containerId){
+  return Array.from($(containerId).querySelectorAll('input[type=checkbox]:checked'))
+              .map(c=>parseInt(c.dataset.id));
+}
+
+// Cargar grados en modal nuevo usuario
+function cargarGradosModal(){
+  fetch('/api/grados').then(r=>r.json()).then(grados=>{
+    _todosGrados = grados;
+    renderGradosCheckboxes('uGradosGrid', grados, []);
+  });
+}
+
+function toggleSeccionesUsr(){
+  const isAdmin = $('uRol').value === '1';
+  $('uSeccionesWrap').style.display = isAdmin ? 'none' : 'block';
+}
+
+// Editar grados de usuario existente
+function editarGradosUsr(uid, nombre){
+  _editGradosUid = uid;
+  var titulo = nombre ? ('🎓 Secciones — ' + decodeURIComponent(nombre)) : '🎓 Grados/Secciones';
+  $('modalGradosUsr').querySelector('.modal-title').textContent = titulo;
+  $('editGradosGrid').innerHTML = '<div style="color:#90a4ae;font-size:.8rem;padding:10px">Cargando secciones...</div>';
+  openModal('modalGradosUsr');
+  fetch(`/api/usuarios/${uid}/grados`)
+    .then(r=>{ if(!r.ok) throw new Error('Error '+r.status); return r.json(); })
+    .then(grados=>{
+      if(grados.error){ $('editGradosGrid').innerHTML=`<div style="color:red">${grados.error}</div>`; return; }
+      renderGradosCheckboxes('editGradosGrid', grados);
+    })
+    .catch(e=>{ $('editGradosGrid').innerHTML=`<div style="color:red">Error cargando: ${e.message}</div>`; });
+}
+
+function guardarGradosUsr(){
+  if(!_editGradosUid) return;
+  const ids = getCheckedGrados('editGradosGrid');
+  fetch(`/api/usuarios/${_editGradosUid}/grados`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({grados: ids})
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){ toast('Grados actualizados correctamente','ok'); closeModal('modalGradosUsr'); }
+    else toast('Error: '+d.error,'err');
+  });
+}
+
+// Cargar secciones en selector de registro
+let _misGradosReg = [];
+function cargarSeccionesReg(){
+  const sel    = $('regFiltroGrado');
+  const info   = $('regSeccionInfo');
+  const errDiv = $('regSeccionError');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">— Cargando secciones... —</option>';
+  if(errDiv) errDiv.style.display = 'none';
+
+  fetch('/api/mis_grados')
+    .then(r => r.json())
+    .then(data => {
+      if(!Array.isArray(data)){
+        throw new Error((data && data.error) ? data.error : 'Respuesta inesperada del servidor');
+      }
+
+      _misGradosReg = data;
+      const esAdmin = (USR.rol === 'Administrador');
+
+      // Para admin: mostrar todas las secciones con opción "Todas"
+      // Para docente: mostrar SOLO las asignadas (asignado==1)
+      const asignadas = data.filter(g => g.asignado == 1);
+
+      let opciones;
+      let labelTodas;
+      if(esAdmin){
+        opciones   = data; // admin ve todo
+        labelTodas = '— Todas las secciones (' + data.length + ') —';
+      } else {
+        opciones   = asignadas; // docente ve solo las suyas
+        labelTodas = asignadas.length > 0
+          ? '— Todas mis secciones (' + asignadas.length + ') —'
+          : '— Sin secciones asignadas —';
+      }
+
+      // Poblar selector
+      let html = '<option value="">' + labelTodas + '</option>';
+      opciones.forEach(g => {
+        html += '<option value="' + g.id_grado + '">' + g.nombre + ' "' + g.seccion + '"</option>';
+      });
+      sel.innerHTML = html;
+
+      // Indicador de estado
+      if(info){
+        if(esAdmin){
+          info.textContent = data.length + ' secciones (Administrador)';
+          info.style.background = '#e3f2fd';
+          info.style.color = '#1565c0';
+        } else if(asignadas.length > 0){
+          info.textContent = '✓ ' + asignadas.length + ' sección(es) asignada(s)';
+          info.style.background = '#e8f5e9';
+          info.style.color = '#2e7d32';
+        } else {
+          info.textContent = '⚠ Sin secciones asignadas — contacte al administrador';
+          info.style.background = '#fff3e0';
+          info.style.color = '#e65100';
+        }
+      }
+
+      // Auto-seleccionar si solo hay una sección disponible
+      if(opciones.length === 1){
+        sel.value = String(opciones[0].id_grado);
+      }
+
+      // Cargar estudiantes de la selección actual
+      mostrarEstudiantesReg('');
+    })
+    .catch(err => {
+      if(errDiv){
+        errDiv.textContent = 'Error: ' + err.message;
+        errDiv.style.display = 'block';
+      }
+      sel.innerHTML = '<option value="">— Error al cargar secciones —</option>';
+      mostrarEstudiantesReg('');
+    });
+}
+
+function filtrarBusqReg(){
+  const q = $('busqReg').value.trim();
+  mostrarEstudiantesReg(q);
+}
+
+let _estRegCache = [];
+function mostrarEstudiantesReg(q){
+  const gradoId = $('regFiltroGrado') ? $('regFiltroGrado').value : '';
+  let url = q ? `/api/estudiantes?q=${encodeURIComponent(q)}` : '/api/estudiantes';
+  if(gradoId) url += (url.includes('?')?'&':'?') + `id_grado=${gradoId}`;
+  const body=$('regBusqBody');
+  const res=$('regBusqResultados');
+  body.innerHTML='<tr><td colspan="6" style="text-align:center;padding:12px;color:#90a4ae">Buscando...</td></tr>';
+  res.style.display='block';
+  fetch(url).then(r=>r.json()).then(data=>{
+    _estRegCache = data;
+    if(!data.length){
+      body.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#90a4ae">Sin estudiantes en esta sección</td></tr>';
+      return;
+    }
+    body.innerHTML=data.map(e=>{
+      const nombre=`${e.nombre||''} ${e.apellido||''}`.trim();
+      const grado=`${e.grado_nombre||''} "${e.seccion||''}"`;
+      const sexo=e.sexo==='M'?'♀ M':'♂ H';
+      const nie=e.nie||'—';
+      return `<tr>
+        <td><b>${nie}</b></td>
+        <td>${nombre}</td>
+        <td><span style="background:var(--azp);color:var(--az);padding:2px 8px;border-radius:12px;font-size:.8rem;font-weight:600">${grado}</span></td>
+        <td style="text-align:center">${sexo}</td>
+        <td>${e.turno||'—'}</td>
+        <td><button class="btn btn-primary btn-sm" onclick="selEstReg(${e.id_estudiante},'${nombre.replace(/'/g,"\\'")}','${nie}')">✓ Seleccionar</button></td>
+      </tr>`;
+    }).join('');
+  }).catch(err=>{
+    body.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:16px;color:red">Error: ${err.message}</td></tr>`;
+  });
+}
+
+function descargarTarjeta(){
+  if(!regEstId){toast('Seleccione un estudiante primero.','err');return;}
+  const now=new Date();
+  window.location=`/api/excel/tarjeta/${regEstId}?mes=${now.getMonth()+1}&anio=${now.getFullYear()}`;
+}
+
+// ── CONSOLIDADO ───────────────────────────────────────────────────────────────
+const MESES_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre'];
+
+function loadConsolidado(){
+  const anio    = document.getElementById('con-anio').value;
+  const idGrado = document.getElementById('con-grado') ? document.getElementById('con-grado').value : '';
+  const idDoc   = document.getElementById('con-docente') ? document.getElementById('con-docente').value : '';
+
+  // Mostrar info del filtro activo
+  var info = document.getElementById('conFiltroInfo');
+  if(info){
+    var partes = [];
+    if(idGrado){ var opt=document.getElementById('con-grado').selectedOptions[0]; partes.push('Sección: '+opt.textContent); }
+    if(idDoc){   var opt=document.getElementById('con-docente').selectedOptions[0]; partes.push('Docente: '+opt.textContent); }
+    info.textContent = partes.length > 0 ? '📌 Filtrado por: '+partes.join(' | ') : 'Mostrando datos generales del centro educativo';
+  }
+
+  var url = (idGrado||idDoc)
+    ? '/api/consolidado/filtrado?anio='+anio+(idGrado?'&id_grado='+idGrado:'')+(idDoc?'&id_docente='+idDoc:'')
+    : '/api/consolidado?anio='+anio;
+
+  fetch(url).then(r=>r.json()).then(data=>{
+    const body=$('conBody');
+    // Indexar por mes
+    const idx={};
+    data.forEach(r=>{idx[r.mes_num||r.mes||0]=r;});
+    let rows='';
+    // Acumuladores separados: matrícula usa el último valor, el resto suma
+    let lastMat_m=0, lastMat_h=0;
+    let sums=Array(18).fill(0);
+    const n = v => (Number(v)||0)|0; // forzar número entero, sin importar tipo
+    MESES_ES.forEach((mes,i)=>{
+      const m=i+1, r=idx[m]||{};
+      const mat_m  = n(r.matricula_m),  mat_h  = n(r.matricula_h);
+      const dem_m  = n(r.demeritos_m),  dem_h  = n(r.demeritos_h);
+      const dA=n(r.d_A), dB=n(r.d_B), dC=n(r.d_C), dD=n(r.d_D);
+      const red_m  = n(r.redenciones_m), red_h = n(r.redenciones_h);
+      const rA=n(r.r_A), rB=n(r.r_B), rC=n(r.r_C);
+      const rec_m  = n(r.reconoc_m),    rec_h = n(r.reconoc_h);
+
+      // Calcular totales por fila
+      const mat_tot = mat_m + mat_h;
+      const dem_tot = dem_m + dem_h;
+      const d_tot   = dA + dB + dC + dD;
+      const red_tot = red_m + red_h;
+      const r_tot   = rA + rB + rC;
+      const rec_tot = rec_m + rec_h;
+
+      // Guardar última matrícula conocida
+      if(mat_m||mat_h){ lastMat_m=mat_m; lastMat_h=mat_h; }
+
+      // Acumular sumas (todo excepto matrícula)
+      const acum=[dem_m,dem_h,dem_tot, dA,dB,dC,dD,d_tot,
+                  red_m,red_h,red_tot, rA,rB,rC,r_tot,
+                  rec_m,rec_h,rec_tot];
+      acum.forEach((v,j)=>{ sums[j]+=v; });
+
+      // Función para mostrar celda: 0 queda en blanco, >0 muestra número
+      const c = v => v>0 ? '<td>'+v+'</td>' : '<td></td>';
+      const cT = v => '<td style="font-weight:700">'+(v>0?v:'')+'</td>'; // total negrita
+
+      rows += '<tr>'
+        +'<td class="mes-col">'+mes+'</td>'
+        +c(mat_m)+c(mat_h)+cT(mat_tot)
+        +c(dem_m)+c(dem_h)+cT(dem_tot)
+        +c(dA)+c(dB)+c(dC)+c(dD)+cT(d_tot)
+        +c(red_m)+c(red_h)+cT(red_tot)
+        +c(rA)+c(rB)+c(rC)+cT(r_tot)
+        +c(rec_m)+c(rec_h)+cT(rec_tot)
+        +'</tr>';
+    });
+
+    // Fila TOTAL anual
+    const lastMatTot = lastMat_m + lastMat_h;
+    const cS = v => '<td>'+(v>0?v:'')+'</td>';
+    const cST = v => '<td style="font-weight:800">'+(v>0?v:'')+'</td>';
+    rows += '<tr class="total-row">'
+      +'<td class="mes-col">TOTAL ANUAL</td>'
+      +'<td>'+lastMat_m+'</td><td>'+lastMat_h+'</td><td style="font-weight:800">'+lastMatTot+'</td>'
+      +sums.map((v,j)=>[2,7,10,14,17].includes(j) ? '<td style="font-weight:800">'+v+'</td>' : '<td>'+v+'</td>').join('')
+      +'</tr>';
+    body.innerHTML=rows;
+  });
+}
+
+function descargarConsolidado(){
+  const anio  = document.getElementById('con-anio').value;
+  const mes   = document.getElementById('con-mes') ? document.getElementById('con-mes').value : '';
+  const grado = document.getElementById('con-grado') ? document.getElementById('con-grado').value : '';
+  const doc   = document.getElementById('con-docente') ? document.getElementById('con-docente').value : '';
+  var url = '/api/excel/consolidado?anio='+anio;
+  if(mes)   url += '&mes='+mes;
+  if(grado) url += '&id_grado='+grado;
+  if(doc)   url += '&id_docente='+doc;
+  window.location = url;
+}
+
+function imprimirConsolidado(){
+  // Agregar clase para ocultar controles al imprimir y luego abrir diálogo
+  var style = document.getElementById('printStyle');
+  if(!style){
+    style = document.createElement('style');
+    style.id = 'printStyle';
+    style.textContent = [
+      '@media print {',
+      '  .app-header, .sidebar, .sidebar-overlay, .btn-bar, .card:first-child { display: none !important; }',
+      '  .main { margin: 0 !important; padding: 8px !important; }',
+      '  .page { display: block !important; }',
+      '  .page:not(#page-consolidado) { display: none !important; }',
+      '  #page-consolidado { display: block !important; }',
+      '  .con-table { font-size: 8pt !important; }',
+      '  .con-table th, .con-table td { padding: 3px 4px !important; }',
+      '  @page { size: landscape; margin: 1cm; }',
+      '}'
+    ].join(' ');
+    document.head.appendChild(style);
+  }
+  // Agregar título con filtros activos
+  var anio  = document.getElementById('con-anio').value;
+  var info  = document.getElementById('conFiltroInfo');
+  var titulo = document.createElement('div');
+  titulo.id = 'printHeader';
+  titulo.style.cssText = 'text-align:center;margin-bottom:12px;font-family:Arial';
+  titulo.innerHTML = '<h2 style="font-size:13pt;margin:0">Registro Consolidado Mensual — INTI</h2>'
+    + '<p style="font-size:9pt;margin:4px 0">Año: '+anio+' &nbsp;|&nbsp; '+(info?info.textContent:'Datos generales')+'</p>'
+    + '<p style="font-size:8pt;color:#666;margin:2px 0">Generado: '+new Date().toLocaleString('es-SV')+'</p>';
+  var page = document.getElementById('page-consolidado');
+  var existing = document.getElementById('printHeader');
+  if(existing) existing.remove();
+  page.insertBefore(titulo, page.firstChild);
+  window.print();
+  // Limpiar después de imprimir
+  setTimeout(function(){ var h=document.getElementById('printHeader'); if(h) h.remove(); }, 1000);
+}
+
+// ── USUARIOS ──────────────────────────────────────────────────────────────────
+function ejecutarImportUsuarios(){
+  var inp = document.getElementById('archivoImportUsr');
+  var res = document.getElementById('importUsrResult');
+  var btn = document.getElementById('btnImportUsr');
+  if(!inp || !inp.files || !inp.files[0]){
+    res.style.display='block';
+    res.style.background='#ffebee'; res.style.color='#c62828';
+    res.innerHTML='⚠ Seleccione un archivo primero.';
+    return;
+  }
+  btn.textContent='⏳ Importando...'; btn.disabled=true;
+  var fd = new FormData();
+  fd.append('archivo', inp.files[0]);
+  fetch('/api/importar_usuarios', {method:'POST', body:fd})
+    .then(r=>r.json())
+    .then(function(d){
+      res.style.display='block';
+      if(d.error){
+        res.style.background='#ffebee'; res.style.color='#c62828';
+        res.innerHTML='❌ Error: '+d.error;
+      } else {
+        var color = d.errores && d.errores.length > 0 ? '#fff8e1' : '#e8f5e9';
+        var txtColor = d.errores && d.errores.length > 0 ? '#e65100' : '#2e7d32';
+        var html = '<b>✅ Importación completada</b><br>';
+        html += '• Usuarios importados: <b>'+d.importados+'</b><br>';
+        html += '• Total de filas: '+d.total_filas+'<br>';
+        if(d.errores && d.errores.length > 0){
+          html += '<br><b>⚠ Errores ('+d.errores.length+'):</b><br>';
+          html += d.errores.slice(0,8).map(function(e){ return '• '+e; }).join('<br>');
+          if(d.errores.length > 8) html += '<br>... y '+(d.errores.length-8)+' más.';
+        }
+        res.style.background=color; res.style.color=txtColor;
+        res.innerHTML=html;
+        if(d.importados > 0) loadUsuarios();
+      }
+      btn.textContent='📤 Importar'; btn.disabled=false;
+    })
+    .catch(function(e){
+      res.style.display='block';
+      res.style.background='#ffebee'; res.style.color='#c62828';
+      res.innerHTML='❌ Error: '+e.message;
+      btn.textContent='📤 Importar'; btn.disabled=false;
+    });
+}
+
+function loadUsuarios(){
+  fetch('/api/usuarios').then(r=>r.json()).then(data=>{
+    const body=$('usrBody');
+    if(!data.length){
+      body.innerHTML='<tr><td colspan="5" style="text-align:center;color:#90a4ae">Sin usuarios</td></tr>';
+      return;
+    }
+    var rows = '';
+    data.forEach(function(u){
+      var esMiCuenta = (u.id_usuario === USR.id_usuario);
+      var td = '<td style="display:flex;gap:4px;flex-wrap:wrap">';
+      td += '<button class="btn btn-outline btn-sm" onclick="abrirEditarUsuario(' + u.id_usuario + ')">&#9998; Editar</button>';
+      td += '<button class="btn btn-outline btn-sm" onclick="editarGradosUsr(' + u.id_usuario + ')">&#127891; Grados</button>';
+      td += '<button class="btn btn-outline btn-sm" onclick="openReset(' + u.id_usuario + ')">&#128273; Reset</button>';
+      td += '<button class="btn ' + (u.activo ? 'btn-danger' : 'btn-success') + ' btn-sm" onclick="toggleUsr(' + u.id_usuario + ',' + (u.activo ? 0 : 1) + ')">' + (u.activo ? 'Desactivar' : 'Activar') + '</button>';
+      if(!esMiCuenta && USR.rol === 'Administrador'){
+        td += '<button class="btn btn-danger btn-sm" onclick="confirmarEliminarUsuario(' + u.id_usuario + ')">&#128465; Eliminar</button>';
+      }
+      td += '</td>';
+      rows += '<tr>'
+        + '<td><b>' + (u.nombre_completo||'') + '</b></td>'
+        + '<td>' + (u.correo||'') + '</td>'
+        + '<td><span class="badge ' + (u.id_rol===1 ? 'badge-warn' : 'badge-ok') + '">' + (u.rol_nombre||'Docente') + '</span></td>'
+        + '<td><span class="badge ' + (u.activo ? 'badge-ok' : 'badge-err') + '">' + (u.activo ? 'Activo' : 'Inactivo') + '</span></td>'
+        + td + '</tr>';
+    });
+    body.innerHTML = rows;
+  });
+}
+
+function openModalUsuario(){
+  $('uNombre').value=''; $('uCorreo').value=''; $('uPass').value='';
+  $('uRol').value='2';
+  $('uSeccionesWrap').style.display='block';
+  cargarGradosModal();
+  openModal('modalUsr');
+}
+
+function crearUsuario(){
+  const d={nombre:$('uNombre').value.trim(),correo:$('uCorreo').value.trim(),
+    password:$('uPass').value,id_rol:$('uRol').value};
+  if(!d.nombre||!d.correo||!d.password){toast('Complete todos los campos.','err');return;}
+  fetch('/api/usuarios',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)})
+  .then(r=>r.json()).then(d=>{
+    if(d.ok){closeModal('modalUsr');loadUsuarios();toast('✅ Usuario creado.','ok');}
+    else toast(d.error||'Error.','err');
+  });
+}
+
+function openReset(uid){$('resetUid').value=uid;$('resetPass').value='';openModal('modalReset');}
+function doReset(){
+  const uid=$('resetUid').value, pwd=$('resetPass').value;
+  if(!pwd){toast('Ingrese la nueva contraseña.','err');return;}
+  fetch(`/api/usuarios/${uid}/reset`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nueva:pwd})})
+  .then(r=>r.json()).then(d=>{if(d.ok){closeModal('modalReset');toast('✅ Contraseña actualizada.','ok');}else toast(d.error,'err');});
+}
+
+function toggleUsr(uid, activo){
+  fetch(`/api/usuarios/${uid}/toggle`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({activo})})
+  .then(r=>r.json()).then(d=>{if(d.ok){loadUsuarios();toast(activo?'Usuario activado.':'Usuario desactivado.','ok');}else toast(d.error,'err');});
+}
+
+// ── IMPORTAR ESTUDIANTES ─────────────────────────────────────────────────────
+function limpiarImport(){
+  var inp = document.getElementById('archivoImport');
+  var res = document.getElementById('importResult');
+  if(inp) inp.value = '';
+  if(res){ res.style.display='none'; res.innerHTML=''; }
+}
+
+function ejecutarImport(){
+  var inp = document.getElementById('archivoImport');
+  var res = document.getElementById('importResult');
+  var btn = document.getElementById('btnImport');
+  if(!inp || !inp.files || !inp.files[0]){
+    res.style.display='block';
+    res.style.background='#ffebee'; res.style.color='#c62828';
+    res.innerHTML='⚠ Seleccione un archivo primero.';
+    return;
+  }
+  btn.textContent='⏳ Importando...'; btn.disabled=true;
+  var fd = new FormData();
+  fd.append('archivo', inp.files[0]);
+  fetch('/api/importar_estudiantes', {method:'POST', body:fd})
+    .then(r=>r.json())
+    .then(d=>{
+      res.style.display='block';
+      if(d.error){
+        res.style.background='#ffebee'; res.style.color='#c62828';
+        res.innerHTML='❌ Error: '+d.error;
+      } else {
+        var color = d.errores && d.errores.length > 0 ? '#fff8e1' : '#e8f5e9';
+        var txtColor = d.errores && d.errores.length > 0 ? '#e65100' : '#2e7d32';
+        var html = '<b>✅ Importación completada</b><br>';
+        html += '• Estudiantes importados: <b>'+d.importados+'</b><br>';
+        html += '• Total de filas procesadas: '+d.total_filas+'<br>';
+        if(d.errores && d.errores.length > 0){
+          html += '<br><b>⚠ Filas con error ('+d.errores.length+'):</b><br>';
+          html += d.errores.slice(0,10).map(e=>'• '+e).join('<br>');
+          if(d.errores.length > 10) html += '<br>... y '+(d.errores.length-10)+' más.';
+        }
+        res.style.background = color; res.style.color = txtColor;
+        res.innerHTML = html;
+        if(d.importados > 0) loadEstudiantes();
+      }
+      btn.textContent='📤 Importar'; btn.disabled=false;
+    })
+    .catch(e=>{
+      res.style.display='block';
+      res.style.background='#ffebee'; res.style.color='#c62828';
+      res.innerHTML='❌ Error de conexión: '+e.message;
+      btn.textContent='📤 Importar'; btn.disabled=false;
+    });
+}
+
+// ── EDITAR USUARIO ───────────────────────────────────────────────────────────
+function abrirEditarUsuario(uid){
+  fetch('/api/usuarios').then(r=>r.json()).then(data=>{
+    var u = data.find(function(x){ return x.id_usuario === uid; });
+    if(!u){ toast('Usuario no encontrado','err'); return; }
+    document.getElementById('euId').value    = u.id_usuario;
+    document.getElementById('euNombre').value = u.nombre_completo||'';
+    document.getElementById('euCorreo').value  = u.correo||'';
+    document.getElementById('euRol').value     = u.id_rol||2;
+    document.getElementById('euActivo').value  = u.activo ? '1' : '0';
+    openModal('modalEditUsr');
+  }).catch(function(e){ toast('Error: '+e.message,'err'); });
+}
+
+function guardarEdicionUsuario(){
+  var uid    = document.getElementById('euId').value;
+  var nombre = document.getElementById('euNombre').value.trim();
+  var correo = document.getElementById('euCorreo').value.trim();
+  var rol    = document.getElementById('euRol').value;
+  var activo = document.getElementById('euActivo').value;
+  if(!nombre || !correo){ toast('Nombre y correo son obligatorios.','err'); return; }
+  fetch('/api/usuarios/'+uid, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({nombre:nombre, correo:correo, id_rol:rol, activo:activo})
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){ closeModal('modalEditUsr'); loadUsuarios(); toast('✅ Usuario actualizado.','ok'); }
+    else toast(d.error||'Error al guardar.','err');
+  }).catch(function(e){ toast('Error: '+e.message,'err'); });
+}
+
+// ── EDITAR / ELIMINAR ESTUDIANTE ─────────────────────────────────────────────
+function abrirEditarEstudiante(id){
+  fetch('/api/estudiantes/'+id+'/datos')
+    .then(r=>r.json())
+    .then(e=>{
+      document.getElementById('eEstId').value = e.id_estudiante;
+      document.getElementById('eNIE').value = e.nie||'';
+      document.getElementById('eNombre').value = e.nombre||'';
+      document.getElementById('eApellido').value = e.apellido||'';
+      document.getElementById('eSexo').value = e.sexo||'M';
+      document.getElementById('eTurno').value = e.turno||'Matutino';
+      document.getElementById('eResp').value = e.nombre_responsable||'';
+      document.getElementById('eTel').value = e.telefono_responsable||'';
+      document.getElementById('eCorreoResp').value = e.correo_responsable||'';
+      // Cargar grados
+      fetch('/api/grados').then(r=>r.json()).then(grados=>{
+        var sel = document.getElementById('eGrado');
+        sel.innerHTML = grados.map(g=>
+          '<option value="'+g.id_grado+'"'+(g.id_grado==e.id_grado?' selected':'')+'>'+g.nombre+' "'+g.seccion+'"</option>'
+        ).join('');
+      });
+      openModal('modalEditEst');
+    })
+    .catch(err=>toast('Error: '+err.message,'err'));
+}
+
+function guardarEdicionEstudiante(){
+  var id = document.getElementById('eEstId').value;
+  var datos = {
+    nie:                 document.getElementById('eNIE').value.trim(),
+    nombre:              document.getElementById('eNombre').value.trim(),
+    apellido:            document.getElementById('eApellido').value.trim(),
+    sexo:                document.getElementById('eSexo').value,
+    id_grado:            document.getElementById('eGrado').value,
+    turno:               document.getElementById('eTurno').value,
+    nombre_responsable:  document.getElementById('eResp').value.trim(),
+    telefono_responsable:document.getElementById('eTel').value.trim(),
+    correo_responsable:  document.getElementById('eCorreoResp').value.trim()
+  };
+  if(!datos.nombre||!datos.apellido||!datos.id_grado){
+    toast('Complete nombre, apellido y grado.','err'); return;
+  }
+  fetch('/api/estudiantes/'+id, {
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(datos)
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){
+      closeModal('modalEditEst');
+      loadEstudiantes();
+      toast('✅ Estudiante actualizado.','ok');
+    } else toast(d.error||'Error al guardar.','err');
+  });
+}
+
+function confirmarEliminarEstudiante(id, nombre){
+  document.getElementById('confirmIcon').textContent = '🗑️';
+  document.getElementById('confirmTitle').textContent = '¿Eliminar estudiante?';
+  document.getElementById('confirmMsg').textContent = 'Se eliminará a "'+nombre+'" del sistema. Esta acción no se puede deshacer.';
+  document.getElementById('confirmBtn').onclick = function(){
+    fetch('/api/estudiantes/'+id, {method:'DELETE'})
+      .then(r=>r.json()).then(d=>{
+        if(d.ok){ closeModal('modalConfirm'); loadEstudiantes(); toast('Estudiante eliminado.','ok'); }
+        else toast(d.error||'Error.','err');
+      });
+  };
+  openModal('modalConfirm');
+}
+
+// ── ELIMINAR USUARIO ──────────────────────────────────────────────────────────
+function confirmarEliminarUsuario(uid, nombre){
+  document.getElementById('confirmIcon').textContent = '⚠️';
+  document.getElementById('confirmTitle').textContent = '¿Eliminar usuario?';
+  var msg = nombre ? ('Se eliminará permanentemente la cuenta de "' + nombre + '". Los registros que haya realizado se conservarán.') : 'Se eliminará permanentemente este usuario.';
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmBtn').onclick = function(){
+    fetch('/api/usuarios/'+uid, {method:'DELETE'})
+      .then(r=>r.json()).then(d=>{
+        if(d.ok){ closeModal('modalConfirm'); loadUsuarios(); toast('Usuario eliminado.','ok'); }
+        else toast(d.error||'Error.','err');
+      });
+  };
+  openModal('modalConfirm');
+}
+
+// ── CONSOLIDADO FILTRADO ──────────────────────────────────────────────────────
+function cargarFiltrosConsolidado(){
+  // Cargar secciones
+  fetch('/api/grados').then(r=>r.json()).then(grados=>{
+    var sel = document.getElementById('con-grado');
+    if(sel && sel.options.length <= 1){
+      grados.forEach(g=>{
+        var op = document.createElement('option');
+        op.value = g.id_grado;
+        op.textContent = g.nombre+' "'+g.seccion+'"';
+        sel.appendChild(op);
+      });
+    }
+  });
+  // Cargar docentes
+  fetch('/api/usuarios').then(r=>r.json()).then(users=>{
+    var sel = document.getElementById('con-docente');
+    if(sel && sel.options.length <= 1){
+      users.forEach(u=>{
+        var op = document.createElement('option');
+        op.value = u.id_usuario;
+        op.textContent = u.nombre_completo+' ('+( u.rol_nombre||'Docente')+')';
+        sel.appendChild(op);
+      });
+    }
+  });
+}
+
+// ── CAMBIAR CONTRASEÑA / PRIMER LOGIN ────────────────────────────────────────
+function guardarNuevaPwd(){
+  var nueva   = document.getElementById('nuevaPwd').value;
+  var confirm = document.getElementById('confirmPwd').value;
+  var err     = document.getElementById('cambiarPwdErr');
+  err.style.display='none';
+  if(nueva.length < 6){
+    err.textContent='La contraseña debe tener al menos 6 caracteres.';
+    err.style.display='block'; return;
+  }
+  if(nueva !== confirm){
+    err.textContent='Las contraseñas no coinciden.';
+    err.style.display='block'; return;
+  }
+  fetch('/api/cambiar_contrasena',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({nueva: nueva})
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){
+      closeModal('modalCambiarPwd');
+      toast('✅ Contraseña actualizada correctamente.','ok');
+    } else {
+      err.textContent = d.error||'Error al guardar.';
+      err.style.display='block';
+    }
+  }).catch(e=>{
+    err.textContent='Error de conexión: '+e.message;
+    err.style.display='block';
+  });
+}
+
+function abrirCambiarPwd(){
+  document.getElementById('cambiarPwdTitulo').textContent = '🔐 Cambiar contraseña';
+  document.getElementById('cambiarPwdMsg').textContent = 'Ingrese su nueva contraseña personal.';
+  document.getElementById('btnCancelarPwd').style.display = 'inline-block';
+  document.getElementById('nuevaPwd').value = '';
+  document.getElementById('confirmPwd').value = '';
+  document.getElementById('cambiarPwdErr').style.display = 'none';
+  openModal('modalCambiarPwd');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(function(){
+  const pagina = '{{ pagina }}';
+  const clase  = '{{ clase if clase is defined else "" }}';
+  const avatarTxt = USR.nombre_completo ? USR.nombre_completo[0].toUpperCase() : 'U';
+  $('avatarLetter').textContent = avatarTxt;
+
+  if(pagina==='registrar'&&clase){
+    navReg(clase, document.querySelector(`[data-page="reg-${clase}"]`));
+  } else {
+    const btn = document.querySelector(`[data-page="${pagina}"]`);
+    navTo(pagina, btn);
+  }
+
+  // Close modal on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(o=>{
+    o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');});
+  });
+})();
+</script>
+</body>
+</html>
